@@ -7,7 +7,7 @@
 \date{\today}
 \title{Introduction to Cloud Networking session 2: \\
 \textit{Dockerizing} Distributed Applications}
-\author{Nicolas Herbaut  \and David Bourasseau \and Daniel Negru \and Laurent Réveillère \and Simon Da Silva \and Mathias Lacaud}
+\author{Simon Da Silva \and Mathias Lacaud}
 
 %\usepackage{fancyhdr}
 \usepackage{listings}
@@ -29,17 +29,32 @@
 
 \section{Introduction}
 \subsection{Installing docker compose}
-Please launch the provided Virtual Machine with Virtual Box. Docker and Docker Compose are already installed. Check that everything works with:
+Install Docker-Compose with:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ docker-compose -f hello-world-composition.yml up
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.22.0/
+docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+$ sudo chmod +x /usr/local/bin/docker-compose
+
+$ docker-compose --version
 \end{lstlisting}
+
+or alternatively, with \textit{pip}: 
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ pip install docker-compose
+
+$ docker-compose --version
+\end{lstlisting}
+
 
 \subsection{Basic Introduction to Docker Compose}
 
 This is a quick description of \textit{docker compose}. If you don't know \textit{docker compose}, go through these explanations -- you will use them in the rest of the lab.
-This introduction presents a simple web application that has two software components: a front-end written in Python and a MongoDB database.
+This introduction presents a simple web application that has two software components: a front-end and a server providing data.
 
 \subsubsection*{Build images}
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
@@ -143,7 +158,7 @@ Along the TP you will use the source code of the application. The code is in the
 
 \begin{questions}
 	\question The \textit{\textbf{Broker}} is simply a RabbitMQ server. Find and image in \textit{Docker Hub}~\footnote{https://hub.docker.com/explore/} and pull it.
-	\begin{enumerate}[(a)] % (a)
+	\begin{enumerate}[(a)]
 		\item What is RabbitMQ?
 		\item What is the standard port used in RabbitMQ?
 		\item Create a \textit{compose} file and define a service ``broker'' based on the rabbitmq image.
@@ -152,12 +167,22 @@ Along the TP you will use the source code of the application. The code is in the
 \subsection{Frontend}
 \begin{questions}
 	\question Define a Dockerfile for the \textit{\textbf{frontend}}.
-	\begin{enumerate}[(a)] % (a)
+	\begin{enumerate}[(a)]
 		\item What base image can we use?
 		\item What tools do you use to install the dependencies?
 		\item Add the service to the \textit{compose} file.
-		\item What is the error in the application? Can you tell it by looking at the logs? (\textit{docker logs container\_name})
 	\end{enumerate}
+Start your docker container. You should see in the logs: 
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+ERROR
+CORRECT USAGE: node index.js <server_ip>
+
+Without the ip of the server, the frontend is useless by itself	
+\end{lstlisting}
+\begin{enumerate}[(d)]
+		\item What is this error in the application? Fix it in the Dockerfile.
+\end{enumerate}
 	
 	\textbf{Hints}:
 	\begin{itemize}
@@ -167,6 +192,7 @@ Along the TP you will use the source code of the application. The code is in the
 		\item The frontend is accessed through port 3000. You can access it using a browser.
 		\item The dependencies must be installed by using \textit{npm install} 
 		\item The server is executed using \textit{node index.js}.
+		\item In this section and to encourage you to read the \textit{Hints}, the teachers won't answer your questions unless they begin with "Docker c'est génial, mais..."
 	\end{itemize}
 	\end{questions}
 \subsection{Server}
@@ -179,15 +205,23 @@ Along the TP you will use the source code of the application. The code is in the
 		\item Add the service to the \textit{compose} file.
 		\item What are the modifications required in the previously defined services?
 		\item How do you force the server to depend on the broker?
+	\end{enumerate}
+	Start your docker container. You should see in the logs something like: 
+	\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+	
+2018/10/30 16:21:09 dial tcp: lookup db on 192.168.1.142:53: no such host
+exit status 1
+		
+	\end{lstlisting}
+	\begin{enumerate}[(e)]
 		\item Why the server fails during start-up?
 	\end{enumerate}
 	
 	\textbf{Hints}:
 	\begin{itemize}
 		\item Find the ``right'' base image by searching in Docker Hub.
-
 		\item Read the README.md of the Server
-
+		\item \textit{"I do not understand why my server is not working. It should just connect to the database and... Wait ! Where is the database ?"} - a random student last year
 	\end{itemize}
 	\end{questions}
 
@@ -234,7 +268,7 @@ Along the TP you will use the source code of the application. The code is in the
 	\begin{enumerate}[(a)] % (a)
 		\item After uploading a video file, the results files are stored in which server? 
 		\item How many HTTP requests are executed by the browser when you refresh the page?
-		\item Show your working application to your teacher. Who knows, he may give you a cookie. 
+		\item Show your working application to your teacher. Who knows, he may give you a cookie... 
 	\end{enumerate}
 	
 	\textbf{Hint:}
