@@ -134,6 +134,13 @@ $ docker-compose up --help
 
 \textit{Question}: what ip address is assigned to each container deployed? Are there differences in comparison to using \textit{docker} without docker-compose ?
 
+Once you have finished this preliminary section, remove the images to save disk storage:
+\begin{lstlisting}[frame=single,language={sh}] % Start your code-block
+
+$ docker rm -f -v $(docker ps -a -q)
+$ docker rmi re355/data re355/app
+\end{lstlisting}
+
 \subsection{Online documentation}
 Additional information on docker compose can be found in the official online documentation~\footnote{https://docs.docker.com/compose/overview/}. Particularly,  in the compose file reference~\footnote{https://docs.docker.com/compose/compose-file/}.
 
@@ -256,7 +263,7 @@ exit status 1
 	
 		\begin{enumerate}[(a)] % (a)
 			\item What is wrong with the proposed solution?
-			\item Why the application in the introduction doesn't fail?
+			\item Why the application in the introduction doesn't fail? Take a look at the Dockefile in the folder \textit{introduction/web}
 			\item How should you modify the \textit{\textbf{Server}}'s \textit{dockerfile} to fix this issue?
 		\end{enumerate}
 	\end{questions}
@@ -321,11 +328,5 @@ exit status 1
 	\end{enumerate}
 	
 \end{questions}
-\section{Appendix}
-
-The benefits of the cloud and scaling, by CommitStrip\footnote{https://www.commitstrip.com}
-\begin{center}
-	\includegraphics[width=10cm]{fig/commitstripcloudscale.jpg}	
-\end{center}
 
 \end{document}
