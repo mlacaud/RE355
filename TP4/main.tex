@@ -1,0 +1,325 @@
+\documentclass[a4paper,11pt]{exam}
+\usepackage[utf8]{inputenc}
+\usepackage{enumerate}
+
+%\usepackage{lipsum}
+
+\date{\today}
+\title{Introduction to Cloud Networking session 4: \\
+Introduction to advanced issues in cloud computing}
+\author{Simon Da Silva \and Mathias Lacaud}
+
+%\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{graphicx}
+
+%\pagestyle{fancy}
+%\fancyhf{}
+\rhead{ENSEIRB-MATMECA}
+\lhead{RE355 Introduction to Cloud Networking}
+
+
+\lstset{language=sh,basicstyle=\ttfamily,columns=fullflexible}
+\begin{document}
+	
+	
+
+\maketitle
+
+\section{Introduction}
+This lab session deals with the utilisation of Docker Swarm and additional 
+tools in order to discover the issues with file sharing and elasticity in 
+distributed systems. As it is the last lab session of the module, the student 
+are supposed to know the basics and to be able to look for informations in 
+the official documentations. The student are still expected to work in 
+groups of 4 with 3 to 4 computers on the same local network. 
+
+First of all, reinitialize the computer:
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ razrezo
+
+$ date --set "$(curl https://time.akamai.com/?iso)"
+
+$ docker service restart 
+
+\end{lstlisting}
+
+Be sure that chromium is installed in at least one of your computers: 
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ apt install chromium
+	
+\end{lstlisting}
+
+You can start chromium as root in a terminal by using: 
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ chromium --no-sandbox
+		
+\end{lstlisting}
+
+Then, create your swarm with: 
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker swarm init
+\end{lstlisting}
+
+Download the correction of the 2nd lab session and extract it. Go into 
+the extracted folder and start the application
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker stack deploy --compose-file docker-compose.yml {name_of_the_stack}
+\end{lstlisting}
+
+After a few seconds, you should be able to see your running application at the address \textbf{http://127.0.0.1:3000/} in chromium.
+
+\section{Docker Swarm}
+
+Create a swarm session on the first computer.
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker swarm init
+
+\end{lstlisting}
+
+\begin{questions}
+	\question You should see a command that needs to be used on the other computers
+	\begin{enumerate}[(a)]
+		\item What is this command ?
+	\end{enumerate}
+Run \textbf{docker nodes}.
+	\begin{enumerate}[(b)]
+		\item What do you see ?
+		\item Which node is the manager ? Do you think it is normal ?
+		\item What kind of information returns \textbf{docker nodes inspect} ? Do not hesitate to use \textbf{--pretty} for a human readable output.
+	\end{enumerate}
+\end{questions}
+
+\section{Nodes and Services}
+
+Let's run some containers on your beautiful swarm ! In Docker Swarm, 
+the containers are deployed using \textbf{docker service}. 
+When \textbf{docker run} is used, the container is started 
+on the local computer.
+\subsection{Simple service}
+Start a service using : 
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker service create --name myservice mlacaud/ubuntu_re355 /bin/bash -c \
+'while true;do echo salut $HOSTNAME |nc -l 8080; done;'
+
+\end{lstlisting}
+
+\begin{questions}
+	\question Run \textbf{docker service ps myservice}
+	\begin{enumerate}[(a)]
+		\item What is this command doing?
+		\item On which computer is the container running?
+	\end{enumerate}
+Scale the service using \textbf{docker service scale myservice=3}
+	\begin{enumerate}[(c)]
+		\item What is this command doing?
+		\item Where are the replicas running?
+		\item Try to create up to 10 replicas. Where are the replicas running? Can you deduce how docker swarm select on which node the containers are deployed by default ? 
+	\end{enumerate}
+\end{questions}
+
+\subsection{Deployment constraint}
+
+Try to run 
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker service create --name myservice --constraint \
+ "node.hostname==$HOSTNAME" --replicas 3 mlacaud/ubuntu_re355 /bin/bash -c \
+ 'while true;do echo salut $HOSTNAME |nc -l 8080; done;'
+\end{lstlisting}
+
+\begin{questions}
+	\question Run \textbf{docker service ps myservice}
+	\begin{enumerate}[(a)]
+		\item What is this command doing?
+		\item On which computer is the container running? Why?
+		\item Try to use another property of the nodes as a constraint. Explain which one you were using.
+		\item Find how to add labels to your nodes using \textbf{docker nodes}. Add the same label to two nodes. What command did you use?
+		\item Can you add several constraints to a service ? Try it and give the command you were using.
+	\end{enumerate}
+\end{questions}
+
+\subsection{Computer Fatal Error}
+Run a service using:
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker service create --name myservice --replicas 3 mlacaud/ubuntu_re355 \
+/bin/bash -c 'while true;do echo salut $HOSTNAME |nc -l 8080; done;'
+
+\end{lstlisting}
+\begin{questions}
+	\question Remove one computer (but not the manager node). To do that, you can poweroff the computer, or remove the internet connection.
+	\begin{enumerate}[(a)]
+		\item Take a look at your service. What is happening?
+		\item On which computer are your containers running now?
+		\item Restart the computer. Is he running on the swarm after the restart?
+		\item Would it work if the manager node is removed?
+		\item By looking at \textbf{docker nodes promote}, what could be a solution to this problem, and why?
+	\end{enumerate}
+\end{questions}
+ 
+\section{Overlay Network} 
+This section is about a new type of network available in a swarm: the overlay networks. 
+\subsection{Attach containers to an overlay network}
+Create an overlay network using:
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker network create -d overlay --attachable test 
+\end{lstlisting}
+
+\begin{questions}
+	\question 
+	\begin{enumerate}[(a)]
+		\item What is this command doing?
+		\item What does the \textbf{--attachable} mean?
+	\end{enumerate}
+
+
+Start two containers \textbf{mlacaud/ubuntu\_re355} in two different computer using \textbf{docker run}. Attach them to the overlay network.
+
+
+	\question 
+	\begin{enumerate}[(a)]
+		\item Can the containers ping each other using their ip address ?
+		\item Can the containers ping each other using their hostnames?
+	\end{enumerate}
+\end{questions}
+
+\subsection{Attach a service to an overlay network}
+
+Create a service running nc with one replica.
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker service create --name nctest --network test -p 8080:8080 \
+mlacaud/ubuntu_re355 /bin/bash -c 'while true;do echo salut $HOSTNAME \
+|nc -l 8080; done;'
+\end{lstlisting}
+
+\begin{questions}
+	\question From another container attached to the network try to ping the container, and try to ping the service.
+	\begin{enumerate}[(a)]
+		\item What is the ip address of the container?
+		\item What is the ip address of the service?
+		\item Inspect the network with \textbf{docker network inspect test}. Do you see the ip of the service ?
+		\item Inspect the service. Do you see the ip address of the service ?
+	\end{enumerate}
+
+	\question Add several replicas. From another container attached to the network, try to get the message sent by the service on port 8080 using nc. Do it several times.
+	\begin{enumerate}[(a)]
+		\item What do you see ?
+		\item How does this load balancing seem to work ?
+	\end{enumerate}
+
+	\question Re-create the service and publish the port 8080 using \textbf{-p}. Try to get the message using from your computer.
+	\begin{enumerate}[(a)]
+		\item Try with the ip address of your computer. Is it working?
+		\item Try with the ip address of a node. Is it working?
+	\end{enumerate}
+\end{questions}
+
+
+\section{Stack}
+
+This section deals with the application "dockerised" in the previous lab session. As we have seen during the current lab session the service can be called from other containers without links.
+
+First of all, the application will need a registry to share your local images between the nodes of your swarm.
+Run a docker repository service in an overlay network using: 
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker service create --name registry --network test -p 5000:5000 \
+registry:2
+\end{lstlisting}
+
+Then, build the Frontend, the Server and the Worker of the application in one computer and push them in the repository.
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker build -t 127.0.0.1:5000/frontend .
+
+$ docker push 127.0.0.1:5000/frontend
+\end{lstlisting}
+
+Modify the Dockerfile created during the previous lab session to make it run using the images from \textit{127.0.0.1:5000/\{service\}}.
+
+\begin{questions}
+	\question 
+	\begin{enumerate}[(a)]
+		\item How will the node be able to get the built images at 127.0.0.1:5000?
+		\item Show your running application to your teacher. He may give you a real cookie this time...
+		\item Your application is running! Are you proud of yourselves?
+	\end{enumerate}
+\end{questions}
+
+\section{Accessing your application: Load balancing}
+
+Let's play a little with this application. 
+\subsection{Default load balancing}
+\begin{questions}
+	\question Using \textbf{docker service}, create 3 replicas of the frontend.
+	\begin{enumerate}[(a)]
+		\item Refresh the web page. What do you see? Was this behaviour predictible considering what we saw in this lab session?
+		\item Does the application still work?
+		\item How does the Docker Swarm default load balancer seems to work?
+		\item What could be the problem with this rule?
+	\end{enumerate}
+\end{questions}
+
+\subsection{External proxy}
+
+Modify your frontend by removing the port forwarding and adding an environment variable \textbf{SERVICE\_PORTS="3000"}.
+
+Restart your stack, and run a \textit{dockercloud/haproxy}:
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker service create --name haproxy --network {servicename}_default \
+--mount target=/var/run/docker.sock,source=/var/run/docker.sock,type=bind \
+-p 80:80 --constraint "node.role == manager" \
+dockercloud/haproxy
+
+\end{lstlisting}
+
+\begin{questions}
+	\question
+	\begin{enumerate}[(a)]
+		\item According to the documention of \textit{dockercloud/haproxy}\footnote{https://hub.docker.com/r/dockercloud/haproxy/}, how can you modify the rule of the proxy ?
+		\item Add this environment variable and choose the rule \textit{source}. What is the difference?
+		\item According to the documentation of haproxy, how does this rule do that ?
+	\end{enumerate}
+\end{questions}
+
+
+\section{The problem with volumes...}
+
+\begin{questions}
+	\question Using \textbf{docker service}, create 3 replicas of the server.
+	\begin{enumerate}[(a)]
+		\item Refresh the web page several times. Is the application still working every time?
+		\item Knowing that the video data are stored on the file system of the server, what is happening?
+		\item Docker Swarm does not include any tool to create distributed volumes. Do you know any tool to create distributed file systems ?
+	\end{enumerate}
+\end{questions}
+
+\section{Rolling Updates}
+
+Let's update the frontend of the application! Use the official documentation to understand how the \textbf{rolling updates} are working in Docker Swarm. Try to modify the HTML of the frontend and update your application.
+\begin{questions}
+	\question Explain what you have done here.
+\end{questions}
+
+
+\end{document}
