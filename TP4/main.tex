@@ -139,7 +139,79 @@ This section introduces the problem of volumes in Docker.
 \section{Network file system}
 
 
+\subsection{NFS Server}
+As Docker Swarm and many orchestrators does not have embedded solution for the management of the volume accross the nodes, it should be managed by the user.
+As an example, this section is about the creation of a distributed file system simultaneously mounted on every computers of the cluster using \textbf{NFS}.
+
+First of all, install NFS:
+
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ apt install nfs-kernel-server
+			
+\end{lstlisting}
+
+Modify the file /etc/exports and export 2 folders of the server.
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+/nfs_server *(rw,sync,fsid=0,no_root_squash,subtree_check)
+/nfs_database *(rw,sync,fsid=0,no_root_squash,subtree_check)				
+\end{lstlisting}
+
+Start the nfc and rpcbind service: 
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+service nfs-server start	
+service rpcbind start			
+\end{lstlisting}
+
+\subsection{Volume mounted on the nodes}
+
+\begin{questions}
+	\question Mount the file system on the other computers.
+	\begin{enumerate}[(a)]
+		\item What command do you use?
+		\item How can you test the distributed file system is working?
+	\end{enumerate}
+	\question Bind the volumes on the server and database service in the docker-compose.yml.
+	\begin{enumerate}[(a)]
+		\item What lines did you add?
+		\item Is the application working when the server is replicated now?
+	\end{enumerate}
+\end{questions}
+
+\subsection{Volume mounted on services}
+\begin{questions}
+	\question In the docker-compose.yml file, create a docker volume connected with the nfs-server. You can use the official documentation\footnote{https://docs.docker.com/engine/reference/commandline/volume/}.
+	\begin{enumerate}[(a)]
+		\item What did you add in the docker-compose.yml file?
+		\item What is the difference with the previous solution.
+	\end{enumerate}
+	\question Bind the volumes on the server and database service in the docker-compose.yml.
+	\begin{enumerate}[(a)]
+		\item What lines did you add?
+		\item Is the application working when the server is replicated now?
+	\end{enumerate}
+\end{questions}
+
+\section{Monitoring}
+
+This section deals with the monitoring of the cluster. The goal is to get the metrics of CPU, RAM and Bandwidth usage of the computers in our cluster.
+
+
 
 \section{Bonus Section: synchronizing volumes with another solution}
 
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+docker run \
+--name=syncthing --rm -d \
+-v $(pwd)/config:/config \
+-v $(pwd)/dir:/dir/share/ \
+-p 8384:8384 -p 22000:22000 -p 21027:21027/udp \
+linuxserver/syncthing				
+\end{lstlisting}
 \end{document}
