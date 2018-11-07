@@ -4,9 +4,9 @@
 
 %\usepackage{lipsum}
 
-\date{\today}
-\title{Introduction to Cloud Networking session 4: \\
-Introduction to advanced issues in cloud computing}
+\date{12 November 2018}
+\title{RE355 - Introduction to Cloud Networking\\
+Lab session 4: Advanced issues in cloud computing}
 \author{Simon Da Silva \and Mathias Lacaud}
 
 %\usepackage{fancyhdr}
@@ -15,26 +15,22 @@ Introduction to advanced issues in cloud computing}
 
 %\pagestyle{fancy}
 %\fancyhf{}
-\rhead{ENSEIRB-MATMECA}
-\lhead{RE355 Introduction to Cloud Networking}
-
+\rhead{Bordeaux INP: ENSEIRB-MATMECA}
+\lhead{RE355 - Introduction to Cloud Networking}
 
 \lstset{language=sh,basicstyle=\ttfamily,columns=fullflexible}
 \begin{document}
-	
-	
 
 \maketitle
 
-\section{Introduction}
-This lab session deals with the utilisation of Docker Swarm and additional 
-tools in order to discover the issues with file sharing and elasticity in 
-distributed systems. As it is the last lab session of the module, the student 
-are supposed to know the basics and to be able to look for informations in 
-the official documentations. The student are still expected to work in 
-groups of 4 with 3 to 4 computers on the same local network. 
+\section{Introduction - Setup}
 
-First of all, reinitialize the computer:
+This lab session deals with the use of Docker Swarm and additional tools to discover the issues with file sharing and elasticity in distributed systems. 
+As it is the final lab session, you are supposed to know the basics.
+We will expect you to search and find information by yourselves in the official documentations.
+For this session, you need to work in groups with 3 to 4 computers on the same local network.
+
+First of all, reinitialize each computer:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
@@ -58,37 +54,46 @@ You can start chromium as root in a terminal by using:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ chromium --no-sandbox
+$ chromium --no-sandbox &
 		
 \end{lstlisting}
 
 Then, create your swarm with: 
+
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
 $ docker swarm init
+
 \end{lstlisting}
 
-Download the correction of the 2nd lab session and extract it. Go into 
-the extracted folder and start the application
+and join the swarm with all the machines.
+
+Download the correction of the 2nd lab session from Moodle and extract it. 
+Go into the extracted folder and start the application:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ docker stack deploy --compose-file docker-compose.yml {name_of_the_stack}
+$ docker stack deploy --compose-file docker-compose.yml {stack-name}
+
 \end{lstlisting}
 
-After a few seconds, you should be able to see your running application at the address \textbf{http://127.0.0.1:3000/} in chromium.
+After a few seconds, you should be able to see your running application at the address \textbf{http://127.0.0.1:3000/} in chromium:
 
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
+$ chromium --no-sandbox http://127.0.0.1:3000/ &
+		
+\end{lstlisting}
 
+\clearpage
 
-\section{The file systems in the application}
+\section{File systems in the application}
 
-Two modules of the application are storing informations on their file system. 
-Firstly, the \textbf{Server} is storing the video to encode and the encoded video
- to be served in its folder \textbf{/go/app/fileServers}. Secondly, the \textbf{Storage}
- (i.e. the database) is storing the data in its folder \textbf{/var/lib/mysql}. 
+Two application modules (inside containers) are storing informations on their local file system. 
+The \textbf{Server} is storing the raw video waiting to be encoded, and the encoded video to be served, in its folder \textit{/go/app/fileServers}. 
+The \textbf{Storage} (i.e. the database) is storing data in its folder \textit{/var/lib/mysql}. 
 
- \begin{figure}[!ht]
+\begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{fig/architecture.png}
 	\label{fig:architecture}
@@ -96,21 +101,20 @@ Firstly, the \textbf{Server} is storing the video to encode and the encoded vide
 
 \section{The problem with volumes...}
 
-This section introduces the problem of volumes.
-
-
-
+This section introduces the problem of volumes in Docker.
 
 \subsection{Safe replication}
+
 \begin{questions}
 	\question Using \textbf{docker service}, create 3 replicas of the frontend.
 	\begin{enumerate}[(a)]
-		\item Refresh the web page. What do you see? Does the application still work?
+		\item Refresh the web page several times. Do you see any change in the page? Does the application still work from different Frontend containers?
 		\item Why is the replication of the Frontend working?
 	\end{enumerate}
 \end{questions}
 
 \subsection{Critical replication}
+
 \begin{questions}
 	\question Using \textbf{docker service}, create 3 replicas of the server.
 	\begin{enumerate}[(a)]
@@ -121,6 +125,7 @@ This section introduces the problem of volumes.
 \end{questions}
 
 \subsection{Persistence in the database}
+
 \begin{questions}
 	\question Using \textbf{docker service}, create 3 replicas of the database.
 	\begin{enumerate}[(a)]
@@ -128,6 +133,8 @@ This section introduces the problem of volumes.
 		\item Why?
 	\end{enumerate}
 \end{questions}
+
+\clearpage
 
 \section{Network file system}
 
