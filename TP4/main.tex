@@ -69,7 +69,7 @@ $ docker swarm init
 and join the swarm with all the machines.
 
 Download the correction of the 2nd lab session from Moodle and extract it. 
-Go into the extracted folder and start the application:
+Go into the extracted folder, modify the published port of the frontend service and expose the port 80.Once done, start the application:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
@@ -81,7 +81,7 @@ After a few seconds, you should be able to see your running application at the a
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ chromium --no-sandbox http://127.0.0.1:3000/ &
+$ chromium --no-sandbox http://127.0.0.1/ &
 		
 \end{lstlisting}
 
@@ -203,19 +203,57 @@ You can use the official documentation\footnote{https://docs.docker.com/engine/r
 \clearpage
 
 \section{Monitoring}
-
+\subsection{Monitoring tools and manual scalling}
 This section deals with the monitoring of the cluster. The goal is to get the metrics of CPU, RAM and Bandwidth usage of the computers in our cluster.
 
-\section{Bonus Section: synchronizing volumes with another solution}
+We are going to install some interesting monitoring tools like Prometheus, node-exporter, cAdvisor and Grafana. 
+Those tools are very powerful but can be hard to install, understand and configure.
+In order to simplify the process and see the basics, we are going to use a starter kit with a working docker compose file.
 
-
+Download the source code from:
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-docker run \
---name=syncthing --rm -d \
--v $(pwd)/config:/config \
--v $(pwd)/dir:/dir/share/ \
--p 8384:8384 -p 22000:22000 -p 21027:21027/udp \
-linuxserver/syncthing				
+$ curl https://github.com/stefanprodan/swarmprom/archive/master.zip >  \
+swarmprom.zip
 \end{lstlisting}
+
+On the manager node, deploy the stack using: 
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ cd swarmprom
+$ ADMIN_USER=admin \
+ ADMIN_PASSWORD=admin \
+ docker stack deploy -c docker-compose.yml monitoring
+\end{lstlisting}
+
+\begin{questions}
+	\question Explain quickly with your own words:
+	\begin{enumerate}[(a)]
+		\item What is cAdvisor?
+		\item What is node-exporter?
+		\item What is Prometheus?
+		\item What is Grafana?
+	\end{enumerate}
+	\question Go to \textbf{http://127.0.0.1:3000/} to see the Grafana interface.
+	\begin{enumerate}[(a)]
+		\item What type of informations do you have access to?
+	\end{enumerate}
+	\question Start a video transcoding from the frontend.
+	\begin{enumerate}[(a)]
+		\item Discuss the CPU usage. Can you know on which computer the video is transcoded?
+		\item Discuss the other metrics.
+	\end{enumerate}
+
+	\question Start several video transcoding from the frontend.
+	\begin{enumerate}[(a)]
+		\item What do you see?  
+		\item Scale the worker up to 3 replicas. What do you see now? Discuss the parallelization of the transcoding.
+	\end{enumerate}
+\end{questions}
+
+
+\section{Automatic scalling}
+
+Pistes: rabbitmq-management, prometheus, docker stats
+
 \end{document}
