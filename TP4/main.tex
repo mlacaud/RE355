@@ -139,10 +139,10 @@ This section introduces the problem of volumes in Docker.
 
 \section{Network file system}
 
-\subsection{NFS Server}
-
 As Docker Swarm and many orchestrators do not have embedded solution for volume management across the nodes, it should be handled by the user.
 This section is about the creation of a distributed file system simultaneously mounted on every computers of the cluster using \textbf{NFS} (as a simple example).
+
+\subsection{NFS Server}
 
 First of all, install NFS:
 
@@ -205,13 +205,13 @@ You can use the official documentation\footnote{https://docs.docker.com/engine/r
 
 \section{Monitoring tools and manual scalling}
 
-This section deals with the monitoring of the cluster. The goal is to get the metrics of CPU, RAM and Bandwidth usage of the computers in our cluster.
+This section deals with the monitoring of the cluster. The goal is to get some metrics on CPU, RAM and Bandwidth usage of computers, containers and services in our cluster.
 
-We are going to install some interesting monitoring tools like Prometheus, node-exporter, cAdvisor and Grafana. 
+We are going to install interesting monitoring tools like Prometheus, node-exporter, cAdvisor and Grafana. 
 Those tools are very powerful but can be hard to install, understand and configure.
 In order to simplify the process and see the basics, we are going to use a starter kit with a working docker compose file.
 
-Download the source code from:
+Download the source code:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
@@ -233,6 +233,7 @@ $ ADMIN_USER=admin \
 \end{lstlisting}
 
 \begin{questions}
+
 	\question Explain quickly with your own words:
 	\begin{enumerate}[(a)]
 		\item What is cAdvisor?
@@ -240,13 +241,16 @@ $ ADMIN_USER=admin \
 		\item What is Prometheus?
 		\item What is Grafana?
 	\end{enumerate}
+	
 	\question Go to \textbf{http://127.0.0.1:3000/} to see the Grafana interface.
 	\begin{enumerate}[(a)]
-		\item What type of informations do you have access to?
+		\item What are the credentials to log in the interface?
+		\item What type of information do you have access to?
 	\end{enumerate}
+	
 	\question Start a video transcoding from the frontend.
 	\begin{enumerate}[(a)]
-		\item Discuss the CPU usage. Can you know on which computer the video is transcoded?
+		\item Discuss the CPU usage. Can you identify on which computer the video is being transcoded?
 		\item Discuss the other metrics.
 	\end{enumerate}
 
@@ -255,11 +259,72 @@ $ ADMIN_USER=admin \
 		\item What do you see?  
 		\item Scale the worker up to 3 replicas. What do you see now? Discuss the parallelization of the transcoding.
 	\end{enumerate}
+	
 \end{questions}
 
+\clearpage
 
-\section{Automatic scalling}
+\section{Automatic scaling}
 
-Pistes: rabbitmq-management, prometheus, docker stats
+In this section, which voluntarily contains few indications and explanations, you will deploy your own automatic scaling solution.
+
+\subsection{Setup}
+
+We will use the video encoding application as an example.
+Remove all running containers by executing the command on ALL machines:
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+docker rm -f $(docker ps -a -q)
+
+\end{lstlisting}
+
+Then deploy the application with one replica of each service:
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker stack deploy --compose-file docker-compose.yml {stack-name}
+
+\end{lstlisting}
+
+If you upload multiple videos, they will be queued and encoded sequentially by the worker.
+When you scale the worker service, multiple videos will be handled and encoded simultaneously.
+
+\subsection{Problem}
+
+Docker Stack (thanks to Docker Swarm) handles service load balancing across nodes.
+When you manually scale your service (up or down), the containers are distributed on multiple machines according to the chosen policy (random, round robin, etc.), and requests are routed to the "most relevant" available container.
+
+However, there is an issue remaining.
+Even though load balancing is natively handled by Docker Swarm, automatic scaling is not.
+It means that when multiple clients reach the service simultaneously, it will not scale by itself to reach high availability and quality of service.
+
+\subsection{Goal}
+
+Your mission, should you choose to accept it, is to automatically scale the worker service according to system / network / Docker metrics, in order to dynamically adapt the number of replicas to the number of queued videos.
+
+There is no constraint on how you manage to reach this goal.
+You can either implement complex monitoring tools, create an application to interact with the Swarm, or develop scripts for instance.
+It's up to you!
+Just make sure to explain your thought process in the report, and talk with us about your ideas.
+Show your solution to your teacher, he might give you a cookie!
+
+\subsection{Useful tools}
+
+To do so, here are some tools that might help you in your struggle:
+
+\begin{itemize}
+
+\item RabbitMQ Management Plugin\footnote{https://www.rabbitmq.com/management.html}
+
+\item Prometheus\footnote{https://prometheus.io/docs/introduction/overview/}
+
+\item Docker Stats\footnote{https://docs.docker.com/engine/reference/commandline/stats/}
+
+\end{itemize}
+
+\subsection{Solution?}
+
+We have developed a perfect solution that we shall demonstrate at the end of the lab session.
 
 \end{document}
