@@ -50,7 +50,7 @@ $ apt install chromium
 	
 \end{lstlisting}
 
-Pull some required images:
+Pull some required images on all the computers:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
@@ -91,7 +91,9 @@ $ chromium --no-sandbox http://127.0.0.1/ &
 
 \clearpage
 
-\section{File systems in the application}
+\section{Volumes and distributed file systems}
+
+\subsection{File systems in the application}
 
 Two application modules (inside containers) are storing informations on their local file system. 
 The \textbf{Server} is storing the raw video waiting to be encoded, and the encoded video to be served, in its folder \textit{/go/app/fileServers}. 
@@ -103,11 +105,11 @@ The \textbf{Storage} (i.e. the database) is storing data in its folder \textit{/
 	\label{fig:architecture}
 \end{figure}
 
-\section{The problem with volumes...}
+\subsection{The problem with volumes...}
 
 This section introduces the problem of volumes in Docker.
 
-\subsection{Safe replication}
+\subsubsection{Safe replication}
 
 \begin{questions}
 	\question Using \textbf{docker service}, create 3 replicas of the frontend.
@@ -117,7 +119,7 @@ This section introduces the problem of volumes in Docker.
 	\end{enumerate}
 \end{questions}
 
-\subsection{Critical replication}
+\subsubsection{Critical replication}
 
 \begin{questions}
 	\question Using \textbf{docker service}, create 3 replicas of the server.
@@ -128,7 +130,7 @@ This section introduces the problem of volumes in Docker.
 	\end{enumerate}
 \end{questions}
 
-\subsection{Persistence in the database}
+\subsubsection{Persistence in the database}
 
 \begin{questions}
 	\question Using \textbf{docker service}, create 3 replicas of the database.
@@ -140,12 +142,12 @@ This section introduces the problem of volumes in Docker.
 
 \clearpage
 
-\section{Network file system}
+\subsection{Network file system}
 
 As Docker Swarm and many orchestrators do not have embedded solution for volume management across the nodes, it should be handled by the user.
 This section is about the creation of a distributed file system simultaneously mounted on every computers of the cluster using \textbf{NFS} (as a simple example).
 
-\subsection{NFS Server}
+\subsubsection{NFS Server}
 
 First of all, install NFS:
 
@@ -173,7 +175,7 @@ service rpcbind start
 
 \end{lstlisting}
 
-\subsection{Volume mounted on the nodes}
+\subsubsection{Volume mounted on the nodes}
 
 \begin{questions}
 	\question Mount the file system on the other computers.
@@ -188,7 +190,7 @@ service rpcbind start
 	\end{enumerate}
 \end{questions}
 
-\subsection{Volume mounted on the services}
+\subsubsection{Volume mounted on the services}
 
 \begin{questions}
 	\question In the \textit{docker-compose.yml} file, create a docker volume connected with the nfs-server. 
@@ -205,13 +207,16 @@ You can use the official documentation\footnote{https://docs.docker.com/engine/r
 \end{questions}
 
 This part about volumes, distributed file systems and data management in containers clusters is over.
-The final sections will introduce one major cloud engineering issue, scaling, which (we hope) you will enjoy solving!
+The final section will introduce one major cloud computing engineering issue, scaling, which (we hope) you will enjoy solving!
 
 \clearpage
 
-\section{Monitoring tools and manual scaling}
+\section{Monitoring tools and scaling}
 
-This section deals with the monitoring of the cluster. The goal is to get some metrics on CPU, RAM and Bandwidth usage of computers, containers and services in our cluster.
+This section deals with the monitoring of the cluster. 
+The goal is to get some metrics on CPU, RAM and Bandwidth usage of computers, containers and services in our cluster, to scale them accordingly.
+
+\subsection{Manual scaling}
 
 We are going to install interesting monitoring tools like Prometheus, node-exporter, cAdvisor and Grafana. 
 Those tools are very powerful but can be hard to install, understand and configure.
@@ -270,11 +275,11 @@ $ ADMIN_USER=admin \
 
 \clearpage
 
-\section{Automatic scaling}
+\subsection{Automatic scaling}
 
 In this section, which voluntarily contains few indications and explanations, you will deploy your own automatic scaling solution.
 
-\subsection{Setup}
+\subsubsection{Setup}
 
 We will use the video encoding application as an example.
 Remove all running containers by executing the command on ALL machines:
@@ -296,7 +301,7 @@ $ docker stack deploy --compose-file docker-compose.yml {stack-name}
 If you upload multiple videos, they will be queued and encoded sequentially by the worker.
 When you scale the worker service, multiple videos will be handled and encoded simultaneously.
 
-\subsection{Problem}
+\subsubsection{Problem}
 
 Docker Stack (thanks to Docker Swarm) handles service load balancing across nodes.
 When you manually scale your service (up or down), the containers are distributed on multiple machines according to the chosen policy (random, round robin, etc.), and requests are routed to the "most relevant" available container.
@@ -305,7 +310,7 @@ However, there is an issue remaining.
 Even though load balancing is natively handled by Docker Swarm, automatic scaling is not.
 It means that when multiple clients reach the service simultaneously, it will not scale by itself to reach high availability and quality of service.
 
-\subsection{Goal}
+\subsubsection{Goal}
 
 Your mission, should you choose to accept it, is to automatically scale the worker service according to system / network / Docker metrics, in order to dynamically adapt the number of replicas to the number of queued videos.
 
@@ -315,7 +320,7 @@ It's up to you!
 Just make sure to explain your thought process in the report, and talk with us about your ideas.
 Show your solution to your teacher, he might give you a cookie!
 
-\subsection{Useful tools}
+\subsubsection{Useful tools}
 
 To do so, here are some tools that might help you in your struggle:
 
@@ -329,7 +334,7 @@ To do so, here are some tools that might help you in your struggle:
 
 \end{itemize}
 
-\subsection{Solution?}
+\subsubsection{Solution?}
 
 We have developed a \textbf{perfect} solution that we shall demonstrate at the end of the lab session.
 
