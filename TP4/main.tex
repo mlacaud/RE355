@@ -38,7 +38,7 @@ $ razrezo
 
 $ date --set "$(curl https://time.akamai.com/?iso)"
 
-$ docker service restart 
+$ service docker restart 
 
 \end{lstlisting}
 
@@ -68,8 +68,9 @@ $ docker swarm init
 
 and join the swarm with all the machines.
 
-Download the correction of the 2nd lab session from Moodle and extract it. 
-Go into the extracted folder, modify the published port of the frontend service and expose the port 80.Once done, start the application:
+Download the correction of the 2nd lab session from Moodle and extract it (\textit{apt install unzip}). 
+Go into the extracted folder, modify the published port of the frontend service and expose the port 80 instead of 3000 (it should look like \textit{80:3000} in the compose file).
+Once done, start the application:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
@@ -164,7 +165,7 @@ Start the nfs and rpcbind service:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-service nfs-server start	
+service nfs-kernel-server start	
 service rpcbind start			
 
 \end{lstlisting}
@@ -211,19 +212,24 @@ Those tools are very powerful but can be hard to install, understand and configu
 In order to simplify the process and see the basics, we are going to use a starter kit with a working docker compose file.
 
 Download the source code from:
+
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
 $ curl https://github.com/stefanprodan/swarmprom/archive/master.zip >  \
 swarmprom.zip
+$ unzip swarmprom.zip
+
 \end{lstlisting}
 
 On the manager node, deploy the stack using: 
+
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ cd swarmprom
+$ cd swarmprom-master
 $ ADMIN_USER=admin \
  ADMIN_PASSWORD=admin \
  docker stack deploy -c docker-compose.yml monitoring
+ 
 \end{lstlisting}
 
 \begin{questions}
