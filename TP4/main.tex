@@ -30,14 +30,14 @@ As it is the final lab session, you are supposed to know the basics.
 We will expect you to search and find information by yourselves in the official documentations.
 For this session, you need to work in groups with 3 to 4 computers on the same local network.
 
-First of all, reinitialize each computer:
+First of all, reinitialize all the machines:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
 $ razrezo
-
 $ date --set "$(curl https://time.akamai.com/?iso)"
-
+$ docker swarm leave
+$ docker system prune
 $ service docker restart 
 
 \end{lstlisting}
@@ -50,15 +50,17 @@ $ apt install chromium
 	
 \end{lstlisting}
 
-You can start chromium as root in a terminal by using: 
+Pull some required images:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ chromium --no-sandbox &
-		
+$ docker pull mlacaud/frontend_re355 
+$ docker pull mlacaud/worker_re355 
+$ docker pull mlacaud/server_re355
+
 \end{lstlisting}
 
-Then, create your swarm with: 
+Then, create your swarm: 
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
@@ -66,15 +68,16 @@ $ docker swarm init
 
 \end{lstlisting}
 
-and join the swarm with all the machines.
+Join the swarm with 3 or 4 machines.
 
-Download the correction of the 2nd lab session from Moodle and extract it (\textit{apt install unzip}). 
-Go into the extracted folder, modify the published port of the frontend service and expose the port 80 instead of 3000 (it should look like \textit{80:3000} in the compose file).
+Download the correction of the 2nd lab session from Moodle and extract it (using \texttt{unzip}). 
+Go into the extracted folder and modify the published port of the frontend service in the compose file, by exposing port 80 instead of 3000 (it should look like \textit{80:3000} instead of \textit{3000:3000}).
+
 Once done, start the application:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ docker stack deploy --compose-file docker-compose.yml {stack-name}
+$ docker stack deploy --compose-file docker-compose.yml <stack-name>
 
 \end{lstlisting}
 
@@ -201,9 +204,12 @@ You can use the official documentation\footnote{https://docs.docker.com/engine/r
 	\end{enumerate}
 \end{questions}
 
+This part about volumes, distributed file systems and data management in containers clusters is over.
+The final sections will introduce one major cloud engineering issue, scaling, which (we hope) you will enjoy solving!
+
 \clearpage
 
-\section{Monitoring tools and manual scalling}
+\section{Monitoring tools and manual scaling}
 
 This section deals with the monitoring of the cluster. The goal is to get some metrics on CPU, RAM and Bandwidth usage of computers, containers and services in our cluster.
 
@@ -325,6 +331,6 @@ To do so, here are some tools that might help you in your struggle:
 
 \subsection{Solution?}
 
-We have developed a perfect solution that we shall demonstrate at the end of the lab session.
+We have developed a \textbf{perfect} solution that we shall demonstrate at the end of the lab session.
 
 \end{document}
