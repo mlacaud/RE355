@@ -37,6 +37,8 @@ First of all, reinitialize all the machines:
 $ razrezo
 $ date --set "$(curl https://time.akamai.com/?iso)"
 $ docker swarm leave
+$ docker service rm $(docker service ls -q)
+$ docker rm -f $(docker ps -a -q)
 $ docker system prune
 $ service docker restart 
 
@@ -286,7 +288,8 @@ Remove all running containers by executing the command on ALL machines:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-docker rm -f $(docker ps -a -q)
+$ docker rm -f $(docker ps -a -q)
+$ docker service rm $(docker service ls -q)
 
 \end{lstlisting}
 
@@ -294,7 +297,7 @@ Then deploy the application with one replica of each service:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ docker stack deploy --compose-file docker-compose.yml {stack-name}
+$ docker stack deploy --compose-file docker-compose.yml <stack-name>
 
 \end{lstlisting}
 
