@@ -51,95 +51,97 @@ $ docker-compose --version
 \end{lstlisting}
 
 
+\subsection{Basic introduction to Dockerfiles}
+
+A Dockerfile describes the software that is “baked” into an image. It isn’t just ingredients tho, it can tell the software what environment to use or what commands to run. Your recipe is often going to be very short.
+
+Every Dockerfile should look like the following. You can find this basic example in the \textit{intro} folder.
+\begin{itemize}
+
+	\item The FROM
+		\begin{lstlisting}[frame=single,language={sh}]
+FROM python:3.5
+	\end{lstlisting}
+	The FROM keyword tells Docker which image your image is based on. In this example, you start from an ubuntu distribution. During the practical, you will have to select an appropriate base image for your language (ex: node, go, python, etc.).
+
+	
+	\item You can RUN some code to pre-install some libraries, create folders, etc. The RUN commands are executed during the build, and their effect are already here when the container is starting.
+
+\begin{lstlisting}[frame=single,language={sh}]
+RUN apt-get update -y
+RUN apt-get install curl
+RUN mkdir lookAtMyDirectory
+\end{lstlisting}
+
+\item The COPY, to copy the code into the container
+
+\begin{lstlisting}[frame=single,language={sh}]
+COPY . /mycode
+\end{lstlisting}
+
+	\item You can also specify what program to execute by default when the user runs a container based on this image. The CMD is not run during the build, but is the command executed when the container is starting
+
+\begin{lstlisting}[frame=single,language={sh}]
+CMD python /mycode/run.py
+\end{lstlisting}	
+	
+	\item At the end, a Dockerfile should look like this one (but it should do something better than just printing "Coucou" ;) 
+	
+\begin{lstlisting}[frame=single,language={sh}]
+FROM python:3.5
+
+RUN apt-get update -y
+RUN apt-get install curl
+RUN mkdir lookAtMyDirectory
+
+COPY . /mycode
+
+CMD python /mycode/run.py
+\end{lstlisting}	
+
+\end{itemize}
+At this point, you have all your software ingredients and behaviors described in a Dockerfile. You are ready to build a new image and to run a container using this image.
+
+\begin{lstlisting}[frame=single,language={sh}]
+$ docker build -t introRE355 .
+
+$ docker run -it --rm introRE355
+\end{lstlisting}	
+
 \subsection{Basic Introduction to Docker Compose}
 
-This is a quick description of \textit{docker compose}. If you don't know \textit{docker compose}, go through these explanations -- you will use them in the rest of the lab.
-This introduction presents a simple web application that has two software components: a front-end and a server providing data.
+A basic \textit{docker-compose.yml} file is available in the folder \textit{intro}. You can see in this docker-compose.yml file that you can create "services". The services are containers. They have an "image", and they can have some other arguments like "volumes", "environment", "network", etc.
 
-\subsubsection*{Build images}
-\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+\subsection{Some Docker compose commands}
 
-# change directory and build image
-$ cd intro/web
-$ docker build -t re355/app .
-
-# now the database
-$ cd ../database
-$ docker build -t re355/data
-\end{lstlisting}
-
-Now you can execute the application. The web server is listening on port 8080 and it depends on the database.
-
-\subsubsection*{Executing the app (you should know this)}
-\textit{Warning: You really have to use 'data' as the name. Do you know why it is necessary? Remember to kill and remove the containers when you are done playing.}
+Start a compose and see the ouputs in the current terminal:
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
-
-$ docker run -d --rm --name data re355/data
-$ docker run -d --rm -p 8080:8080 --link data re355/app 
-      
-\end{lstlisting}
-
-Now you can go to the browser and enjoy this ``awesome'' application.
-
-\subsubsection*{Using docker compose}
-You have a \textit{docker-compose.yml} under the directory \textit{intro}:
-\begin{lstlisting}[frame=single,language={sh}, tabsize=2, numbers=left]  
-version: '2'
-services:
-	web:
-		build:
-			context: ./web
-		image: re355/app:latest
-		ports:
-		- "8080:8080"
-		links:
-		- data
-
-	data:
-		container_name: data
-		build:
-			context: ./database
-		image: re355/data       
-\end{lstlisting}
-
-In this docker compose file we are declaring two containers: \textit{web} (line 3) and \textit{data} (line 12).
-They use images \textit{re351/web} and \textit{re351/data}.
-In our case, this means using the Docker files inside directories \textit{./web} and \textit{./database}.
-As you can see, the there is a port mapping (same as \textit{-p}), and the \textit{web} container is linked to \textit{data}.
-Finally, in lines 5 and 15, we specify how to build the images if they don't exists. 
-
-\subsection*{Deploying and stopping the composition}
-\begin{lstlisting}[frame=single,language={sh}] % Start your code-block
-
-# no need to speficy the file name. By default it uses docker-compose.yml.
+	
 $ docker-compose up
-
-# play time ...
-
-# then you can stop it using Ctrl+C or the command below
-$ docker-compose down
 \end{lstlisting}
 
-You can use the flag \textit{-d} to launch the composition in detached mode. In such a case, using the \textit{down} subcommand is the only option to stop the composition. 
-To see a description of each subcommand simply type:
-\begin{lstlisting}[frame=single,language={sh}] % Start your code-block
+Start a compose in the background:
 
-# list of subcommands
-$ docker-compose
-
-# description of one subcommand
-$ docker-compose up --help
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+	
+$ docker-compose up -d
 \end{lstlisting}
 
-\textit{Question}: what ip address is assigned to each container deployed? Are there differences in comparison to using \textit{docker} without docker-compose ?
+Stop all of the containers:
 
-Once you have finished this preliminary section, remove the images to save disk storage:
-\begin{lstlisting}[frame=single,language={sh}] % Start your code-block
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ docker rm -f -v $(docker ps -a -q)
-$ docker rmi re355/data re355/app
+$ docker-compose stop
 \end{lstlisting}
+
+Remove all of the containers:
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+$ docker-compose rm
+\end{lstlisting}
+
 
 \subsection{Online documentation}
 Additional information on docker compose can be found in the official online documentation~\footnote{https://docs.docker.com/compose/overview/}. Particularly,  in the compose file reference~\footnote{https://docs.docker.com/compose/compose-file/}.
@@ -193,8 +195,7 @@ Without the ip of the server, the frontend is useless by itself
 	
 	\textbf{Hints}:
 	\begin{itemize}
-		\item The application has been developped with NodeJS.
-		\item You can use the \textit{alpine} tag of the base image to build a smaller frontend image.
+		\item The application has been developped with NodeJS version 8.
 		\item Remember that a \textit{Dockerfile} has: base image, copy source code, dependencies, entry point.
 		\item The frontend is accessed through port 3000. You can access it using a browser.
 		\item The dependencies must be installed by using \textit{npm install} 
@@ -205,7 +206,7 @@ Without the ip of the server, the frontend is useless by itself
 \subsection{Server}
 	\begin{questions}
 
-	\question Now it is time to dockerize the \textit{\textbf{server}}. Jump into the directory \textit{Server}. This component is far more complex than the \textit{\textbf{frontend}}. It is developped in Go (also called \textit{golang}). The component receives requests on port 8085.
+	\question Now it is time to dockerize the \textit{\textbf{server}}. Jump into the directory \textit{Server}. This component is far more complex than the \textit{\textbf{frontend}}. It is developped in Go (also called \textit{golang}) version 1.8. The component receives requests on port 8085.
 	
 	\begin{enumerate}[(a)] % (a)
 		\item What base image can we use?
@@ -227,7 +228,7 @@ exit status 1
 	\textbf{Hints}:
 	\begin{itemize}
 		\item Find the ``right'' base image by searching in Docker Hub.
-		\item Read the README.md of the Server
+		\item Read the README.md of the Server, because the integration is very easy when you have some README :)
 		\item \textit{"I do not understand why my server is not working. It should just connect to the database and... Wait ! Where is the database ?"} - a random student last year
 	\end{itemize}
 	\end{questions}
@@ -235,7 +236,7 @@ exit status 1
 
 \subsection{Database}
 	\begin{questions}
-		\question The \textbf{server} needs a Mysql database to work. Let's dockerize the \textbf{storage}.
+		\question The \textbf{server} needs a Mysql database version 5.6 to work. Let's dockerize the \textbf{storage}.
 	
 	\begin{enumerate}[(a)] % (a)
 		\item What base image can we use?
@@ -251,7 +252,7 @@ exit status 1
 
 		\item Remember that the environment variable MYSQL\_ROOT\_PASSWORD is mandatory.
 
-		\item On the server side, use the \textbf{-d \textit{database\_addr}}
+		\item On the server side, use the \textbf{-d \textit{database\_addr}} argument in your CMD.
 
 	\end{itemize}
 	\end{questions}
@@ -263,8 +264,7 @@ exit status 1
 	
 		\begin{enumerate}[(a)] % (a)
 			\item What is wrong with the proposed solution?
-			\item Why the application in the introduction doesn't fail? Take a look at the Dockefile in the folder \textit{introduction/web}
-			\item How should you modify the \textit{\textbf{Server}}'s \textit{dockerfile} to fix this issue?
+			\item How should you modify the \textit{\textbf{Server}}'s \textit{dockerfile} to fix this issue? Hints: you have a wait-for-it.sh file in the Server sources.
 		\end{enumerate}
 	\end{questions}
 \subsection{Worker and full application}
