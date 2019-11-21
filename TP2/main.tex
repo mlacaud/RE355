@@ -206,7 +206,7 @@ Without the ip of the server, the frontend is useless by itself
 \subsection{Server}
 	\begin{questions}
 
-	\question Now it is time to dockerize the \textit{\textbf{server}}. Jump into the directory \textit{Server}. This component is far more complex than the \textit{\textbf{frontend}}. It is developped in Go (also called \textit{golang}) version 1.8. The component receives requests on port 8085.
+	\question Now it is time to dockerize the \textit{\textbf{server}}. Jump into the directory \textit{Server}. This component is far more complex than the \textit{\textbf{frontend}}. It is developped in Go (also called \textit{golang}) version 1.9. The component receives requests on port 8085.
 	
 	\begin{enumerate}[(a)] % (a)
 		\item What base image can we use?
@@ -302,31 +302,6 @@ exit status 1
 		\item Change you Dockerfile to use \textit{alpine} as a base image. Copy the new file and run it. Build the new image. Take alook at its size. Conclude. 
 	\end{enumerate}
 \end{questions}
-\section{Managing the resources of a cloud-based application}
-\begin{questions}
-	\question Let's assign some CPU quota to the web application we discuss in the introduction. Go to folder \textit{broken\_introduction} and deploy the application.
-	
-	\begin{enumerate}[(a)] % (a)
-		\item What is the time needed to answer a request when no quota is used?
-		\item Set a quota of 25\% of the CPU for the Web Container. What must be added to \textit{composition} file? 
-		\item How long does it take to answer a request when the quota is 25\%?
-	\end{enumerate}
-	
-	\question Suppose we have two clients accessing the application \textit{broken\_introduction}. We are offering them the same service but with a different quality. Modify the composition file to deploy a second \textit{web} container with a quota of 75\% of CPU.
-	
-	\begin{enumerate}[(a)] % (a)
-	 	\item How long does it take to update the page? How are you testing this?
-	\end{enumerate}
-	
-	\question We want to expose the previous application using the same URI for both clients (e.g., http://unique-addr:8888/) . This means that client 1 will connect to a service that has a CPU quota of 25\% and client 2 to a service with a quota of 75\%.
-	 
-	\begin{enumerate}[(a)] % (a)
-		\item What tools should we use to achieve this?
-		\item What should we modify in the \textit{composition} file?
-		\item How can you test this new deployment?
-	\end{enumerate}
-	
-\end{questions}
 
 \section{Appendix}
 
@@ -334,6 +309,5 @@ At the end of this lab session, you will be rewarded by a beautiful red panda !
 \begin{center}
 	\includegraphics[width=12cm]{fig/redpanda.png}	
 \end{center}
-
 
 \end{document}
