@@ -204,30 +204,45 @@ mlacaud/ubuntu_re355 /bin/bash -c 'while true;do echo salut $HOSTNAME \
 
 This section deals with the application "dockerised" in the previous lab session. As we have seen during the current lab session the service can be called from other containers without links.
 
-First of all, the application will need a registry to share your local images between the nodes of your swarm.
-Run a docker repository service in an overlay network using: 
+First of all, create a Dockerfile with the following content:
+
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
 
-$ docker service create --name registry --network test -p 5000:5000 \
-registry:2
+version: '3.7'
+services:
+  broker:
+    image: rabbitmq
+
+  server:
+    image: mlacaud/server_re355
+
+  db:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=re355
+      - MYSQL_PASSWORD=re355
+      - MYSQL_DATABASE=re355
+
+  worker:
+    image: mlacaud/worker_re355
+    environment:
+      - BROKER_ADDR=broker:5672
+
+  frontend:
+    image: mlacaud/frontend_re355
+    ports:
+      - "3000:3000"
 \end{lstlisting}
 
-Then, build the Frontend, the Server and the Worker of the application in one computer and push them in the repository.
 
-\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
-
-$ docker build -t 127.0.0.1:5000/frontend .
-
-$ docker push 127.0.0.1:5000/frontend
-\end{lstlisting}
-
-Modify the Dockerfile created during the previous lab session to make it run using the images from \textit{127.0.0.1:5000/\{service\}}.
+Use \textbf{docker stack} to run the application.
 
 \begin{questions}
 	\question 
 	\begin{enumerate}[(a)]
-		\item How will the node be able to get the built images at 127.0.0.1:5000?
+		\item By using the documentation, what \textbf{docker stack} command should you use ?
 		\item Show your running application to your teacher. He may give you a real cookie this time...
 		\item Your application is running! Are you proud of yourselves?
 	\end{enumerate}
