@@ -72,8 +72,38 @@ $ docker swarm init
 
 Join the swarm with 3 or 4 machines.
 
-Download the correction of the 2nd lab session from Moodle and extract it (using \texttt{unzip}). 
-Go into the extracted folder and modify the published port of the frontend service in the compose file, by exposing port 80 instead of 3000 (it should look like \textit{80:3000} instead of \textit{3000:3000}).
+reate a Dockerfile with the following content:
+
+
+\begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
+
+version: '3.7'
+services:
+  broker:
+    image: rabbitmq
+
+  server:
+    image: mlacaud/server_re355
+
+  db:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=re355
+      - MYSQL_PASSWORD=re355
+      - MYSQL_DATABASE=re355
+
+  worker:
+    image: mlacaud/worker_re355
+    environment:
+      - BROKER_ADDR=broker:5672
+
+  frontend:
+    image: mlacaud/frontend_re355
+    ports:
+	  - "80:3000"
+	  
+\end{lstlisting}
 
 Once done, start the application:
 
@@ -180,12 +210,12 @@ service rpcbind start
 \subsubsection{Volume mounted on the nodes}
 
 \begin{questions}
-	\question Mount the file system on the other computers.
+	\question Mount the file system on the other computers at the same path.
 	\begin{enumerate}[(a)]
 		\item What command do you use?
 		\item How can you test if the distributed file system is working?
 	\end{enumerate}
-	\question Bind the volumes to the server and database service in the \textit{docker-compose.yml} file.
+	\question Bind the path to a volumes in the server and database service of the \textit{docker-compose.yml} file.
 	\begin{enumerate}[(a)]
 		\item What lines did you add?
 		\item Is the application fully functional when the server is replicated now?
@@ -195,7 +225,7 @@ service rpcbind start
 \subsubsection{Volume mounted on the services}
 
 \begin{questions}
-	\question In the \textit{docker-compose.yml} file, create a docker volume connected with the nfs-server. 
+	\question In the \textit{docker-compose.yml} file, create a docker volume directly connected with the nfs-server. 
 You can use the official documentation\footnote{https://docs.docker.com/engine/reference/commandline/volume/}.
 	\begin{enumerate}[(a)]
 		\item What did you add in the docker-compose.yml file?
