@@ -28,12 +28,12 @@
 
 \section{Introduction}
 This lab session deals with the utilisation of Docker Swarm in order 
-to manage containers on multiple computers. The student are expected 
-to work in groups of 4 with 3 to 4 computers on the same local network. 
+to manage containers on multiple computers.
+The students are expected to work in groups of 4 with 3 to 4 computers on the same local network. 
 
 Special docker commands like \textit{docker swarm}, \textit{docker service},
  \textit{docker nodes} and \textit{docker stack} are going to be used. 
- Always remember that the help for every sub-docker functions are available
+ Always remember that the help for every sub-docker function is available
   using \textit{\textbf{-h}}.
 
 \begin{lstlisting}[frame=single,language={sh}]  % Start your code-block
@@ -59,19 +59,19 @@ $ docker swarm init
 \begin{questions}
 	\question You should see a command that needs to be used on the other computers
 	\begin{enumerate}[(a)]
-		\item What is this command ?
+		\item What does this command do?
 	\end{enumerate}
 Run \textbf{docker nodes}.
 	\begin{enumerate}[(b)]
-		\item What do you see ?
-		\item Which node is the manager ? Do you think it is normal ?
-		\item What kind of information returns \textbf{docker nodes inspect} ? Do not hesitate to use \textbf{--pretty} for a human readable output.
+		\item What do you see?
+		\item Which node is the manager? Do you think it is normal?
+		\item What kind of information returns \textbf{docker nodes inspect}? Do not hesitate to use \textbf{-~-~pretty} for a human readable output.
 	\end{enumerate}
 \end{questions}
 
 \section{Nodes and Services}
 
-Let's run some containers on your beautiful swarm ! In Docker Swarm, 
+Let's run some containers on your beautiful swarm! In Docker Swarm, 
 the containers are deployed using \textbf{docker service}. 
 When \textbf{docker run} is used, the container is started 
 on the local computer.
@@ -94,7 +94,7 @@ Scale the service using \textbf{docker service scale myservice=3}
 	\begin{enumerate}[(c)]
 		\item What is this command doing?
 		\item Where are the replicas running?
-		\item Try to create up to 10 replicas. Where are the replicas running? Can you deduce how docker swarm select on which node the containers are deployed by default ? 
+		\item Try to create up to 10 replicas. Where are the replicas running? Can you deduce how docker swarm selects on which node the containers are deployed by default? 
 	\end{enumerate}
 \end{questions}
 
@@ -115,7 +115,7 @@ $ docker service create --name myservice --constraint \
 		\item On which computer is the container running? Why?
 		\item Try to use another property of the nodes as a constraint. Explain which one you were using.
 		\item Find how to add labels to your nodes using \textbf{docker nodes}. Add the same label to two nodes. What command did you use?
-		\item Can you add several constraints to a service ? Try it and give the command you were using.
+		\item Can you add several constraints to a service? Try it and give the command you were using.
 	\end{enumerate}
 \end{questions}
 
@@ -152,7 +152,7 @@ $ docker network create -d overlay --attachable test
 	\question 
 	\begin{enumerate}[(a)]
 		\item What is this command doing?
-		\item What does the \textbf{--attachable} mean?
+		\item What does the \textbf{-~-~attachable} mean?
 	\end{enumerate}
 
 
@@ -161,7 +161,7 @@ Start two containers \textbf{mlacaud/ubuntu\_re355} in two different computer us
 
 	\question 
 	\begin{enumerate}[(a)]
-		\item Can the containers ping each other using their ip address ?
+		\item Can the containers ping each other using their IP address?
 		\item Can the containers ping each other using their hostnames?
 	\end{enumerate}
 \end{questions}
@@ -180,22 +180,22 @@ mlacaud/ubuntu_re355 /bin/bash -c 'while true;do echo salut $HOSTNAME \
 \begin{questions}
 	\question From another container attached to the network try to ping the container, and try to ping the service.
 	\begin{enumerate}[(a)]
-		\item What is the ip address of the container?
-		\item What is the ip address of the service?
-		\item Inspect the network with \textbf{docker network inspect test}. Do you see the ip of the service ?
-		\item Inspect the service. Do you see the ip address of the service ?
+		\item What is the IP address of the container?
+		\item What is the IP address of the service?
+		\item Inspect the network with \textbf{docker network inspect test}. Do you see the IP of the service?
+		\item Inspect the service. Do you see the IP address of the service?
 	\end{enumerate}
 
 	\question Add several replicas. From another container attached to the network, try to get the message sent by the service on port 8080 using nc. Do it several times.
 	\begin{enumerate}[(a)]
-		\item What do you see ?
-		\item How does this load balancing seem to work ?
+		\item What do you see?
+		\item How does this load balancing seem to work?
 	\end{enumerate}
 
 	\question Re-create the service and publish the port 8080 using \textbf{-p}. Try to get the message using from your computer.
 	\begin{enumerate}[(a)]
-		\item Try with the ip address of your computer. Is it working?
-		\item Try with the ip address of a node. Is it working?
+		\item Try with the IP address of your computer. Is it working?
+		\item Try with the IP address of a node. Is it working?
 	\end{enumerate}
 \end{questions}
 
@@ -242,7 +242,7 @@ Use \textbf{docker stack} to run the application.
 \begin{questions}
 	\question 
 	\begin{enumerate}[(a)]
-		\item By using the documentation, what \textbf{docker stack} command should you use ?
+		\item By using the documentation, what \textbf{docker stack} command should you use?
 		\item Show your running application to your teacher. He may give you a real cookie this time...
 		\item Your application is running! Are you proud of yourselves?
 	\end{enumerate}
@@ -279,9 +279,9 @@ dockercloud/haproxy
 \begin{questions}
 	\question
 	\begin{enumerate}[(a)]
-		\item According to the documention of \textit{dockercloud/haproxy}\footnote{https://hub.docker.com/r/dockercloud/haproxy/}, how can you modify the rule of the proxy ?
+		\item According to the documention of \textit{dockercloud/haproxy}\footnote{https://hub.docker.com/r/dockercloud/haproxy/}, how can you modify the rule of the proxy?
 		\item Add this environment variable and choose the rule \textit{source}. What is the difference?
-		\item According to the documentation of haproxy, how does this rule do that ?
+		\item According to the documentation of haproxy, how does this rule do that?
 	\end{enumerate}
 \end{questions}
 
@@ -293,7 +293,7 @@ dockercloud/haproxy
 	\begin{enumerate}[(a)]
 		\item Refresh the web page several times. Is the application still working every time?
 		\item Knowing that the video data are stored on the file system of the server, what is happening?
-		\item Docker Swarm does not include any tool to create distributed volumes. Do you know any tool to create distributed file systems ?
+		\item Docker Swarm does not include any tool to create distributed volumes. Do you know any tool to create distributed file systems?
 	\end{enumerate}
 \end{questions}
 
@@ -308,7 +308,7 @@ Let's update the frontend of the application! Use the official documentation to 
 
 The benefits of the cloud and scaling, by CommitStrip\footnote{https://www.commitstrip.com}
 \begin{center}
-	\includegraphics[width=10cm]{fig/commitstripcloudscale.jpg}	
+	\includegraphics[width=5.5cm]{fig/commitstripcloudscale.jpg}	
 \end{center}
 
 \end{document}
